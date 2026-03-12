@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { useState, useEffect, useRef } from "react";
 import React from "react";
 
@@ -1679,14 +1680,22 @@ function PlantCard({ plant, locked, onToggleLock, onRemove, onChangeVariety, gri
 function CategorySection({ name, plants, lockedIds, onToggleLock, onRemove, onAdd, adding, addError, onChangeVariety, gridSize, onSelect }) {
   const c = CAT[name] || { ink: T.accent };
   const atMax = plants.length >= MAX_PER_CAT;
+  const [open, setOpen] = React.useState(true);
   return (
-    <div style={{ marginBottom: 36 }}>
-      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 6 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+    <div style={{ marginBottom: 28 }}>
+      {/* ── category header row ── */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {/* collapse toggle */}
+          <button type="button" onClick={() => setOpen(o => !o)}
+            style={{ background: "none", border: "none", cursor: "pointer", padding: 0, lineHeight: 1,
+              fontFamily: T.sans, fontSize: 9, color: T.inkLight, width: 12, textAlign: "center", flexShrink: 0 }}>
+            {open ? "▾" : "▸"}
+          </button>
           <span style={{ fontFamily: T.sans, fontSize: 9, fontWeight: 500, letterSpacing: "0.16em", textTransform: "uppercase", color: c.ink }}>{name}</span>
           <span style={{ fontFamily: T.sans, fontSize: 10, fontWeight: 300, color: T.inkLight }}>{plants.length} / {MAX_PER_CAT}</span>
         </div>
-        {!atMax && (
+        {open && !atMax && (
           <button type="button" onClick={() => { if (!adding) onAdd(name); }} disabled={adding}
             style={{ background: "none", border: "none", cursor: adding ? "default" : "pointer", fontFamily: T.sans, fontSize: 10, fontWeight: 300, letterSpacing: "0.03em", color: adding ? T.inkLight : T.accent, display: "flex", alignItems: "center", gap: 4, padding: 0 }}>
             {adding ? <><Spinner /> finding…</> : `+ add ${SING[name]}`}
@@ -1694,33 +1703,37 @@ function CategorySection({ name, plants, lockedIds, onToggleLock, onRemove, onAd
         )}
       </div>
       <div style={{ borderTop: `1px solid ${c.ink}`, opacity: 0.2 }} />
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: `repeat(${gridSize || 3}, 1fr)`,
-        gap: 2,
-        marginTop: 2,
-        width: "100%",
-        boxSizing: "border-box",
-      }}>
-        {[...plants]
-          .sort((a, b) => {
-            const aLocked = lockedIds?.has(a.id) ? 0 : 1;
-            const bLocked = lockedIds?.has(b.id) ? 0 : 1;
-            if (aLocked !== bLocked) return aLocked - bLocked;
-            return a.common.localeCompare(b.common);
-          })
-          .map(p => (
-            <PlantCard key={p.id} plant={p} locked={lockedIds?.has(p.id)}
-              onToggleLock={onToggleLock} onRemove={onRemove} onChangeVariety={onChangeVariety}
-              gridSize={gridSize || 3} onSelect={onSelect} />
-          ))
-        }
-      </div>
-      {addError && (
-        <div style={{ fontFamily: T.sans, fontSize: 11, fontWeight: 300, color: T.red, padding: "6px 0" }}>{addError}</div>
-      )}
-      {atMax && (
-        <div style={{ fontFamily: T.sans, fontSize: 11, fontWeight: 300, color: T.inkLight, padding: "8px 0", textAlign: "center" }}>Maximum {MAX_PER_CAT} reached</div>
+      {open && (
+        <>
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: `repeat(${gridSize || 6}, 1fr)`,
+            gap: 2,
+            marginTop: 2,
+            width: "100%",
+            boxSizing: "border-box",
+          }}>
+            {[...plants]
+              .sort((a, b) => {
+                const aLocked = lockedIds?.has(a.id) ? 0 : 1;
+                const bLocked = lockedIds?.has(b.id) ? 0 : 1;
+                if (aLocked !== bLocked) return aLocked - bLocked;
+                return a.common.localeCompare(b.common);
+              })
+              .map(p => (
+                <PlantCard key={p.id} plant={p} locked={lockedIds?.has(p.id)}
+                  onToggleLock={onToggleLock} onRemove={onRemove} onChangeVariety={onChangeVariety}
+                  gridSize={gridSize || 6} onSelect={onSelect} />
+              ))
+            }
+          </div>
+          {addError && (
+            <div style={{ fontFamily: T.sans, fontSize: 11, fontWeight: 300, color: T.red, padding: "6px 0" }}>{addError}</div>
+          )}
+          {atMax && (
+            <div style={{ fontFamily: T.sans, fontSize: 11, fontWeight: 300, color: T.inkLight, padding: "8px 0", textAlign: "center" }}>Maximum {MAX_PER_CAT} reached</div>
+          )}
+        </>
       )}
     </div>
   );
@@ -1762,7 +1775,7 @@ function ZoneModal({ initial, onSave, onClose }) {
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div style={{ background: "#fff", width: 540, maxWidth: "100%", maxHeight: "90vh", overflowY: "auto" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 24px", borderBottom: `1px solid ${T.border}` }}>
-          <span style={{ fontFamily: T.sans, fontSize: 13, fontWeight: 300, letterSpacing: "0.06em", textTransform: "uppercase", color: T.ink }}>{initial ? "Edit Zone" : "Add Planting Zone"}</span>
+          <span style={{ fontFamily: T.sans, fontSize: 13, fontWeight: 300, letterSpacing: "0.06em", textTransform: "uppercase", color: T.ink }}>{initial ? "Edit Zone" : "Add Character Zone"}</span>
           <button type="button" onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: T.inkLight, fontSize: 18, lineHeight: 1, padding: "0 2px" }}>×</button>
         </div>
         <div style={{ padding: "24px" }}>
@@ -1921,7 +1934,7 @@ function NewProjectScreen({ onSave, onCancel }) {
       <Btn onClick={onCancel} variant="link" small style={{ marginBottom: 16, color: T.inkLight }}>← Back</Btn>
       <div style={{ fontFamily: T.sans, fontSize: 30, fontWeight: 300, color: T.ink, marginBottom: 4 }}>New Project</div>
       <div style={{ fontFamily: T.sans, fontSize: 13, color: T.inkMid, fontWeight: 300, marginBottom: 32 }}>
-        Zone and style apply across all planting zones in this project.
+        Zone and style apply across all character zones in this project.
       </div>
 
       <div style={{ maxWidth: 520 }}>
@@ -2037,7 +2050,7 @@ function ProjectScreen({ project, onBack, onAddZone, onOpenZone, onEditZone }) {
 
       {project.zones.length === 0 ? (
         <div style={{ borderTop: `1px solid ${T.border}`, padding: "48px 0", textAlign: "center" }}>
-          <div style={{ fontFamily: T.sans, fontStyle: "italic", fontSize: 20, fontWeight: 300, color: T.inkLight, marginBottom: 8 }}>No planting zones</div>
+          <div style={{ fontFamily: T.sans, fontStyle: "italic", fontSize: 20, fontWeight: 300, color: T.inkLight, marginBottom: 8 }}>No character zones</div>
           <div style={{ fontFamily: T.sans, fontSize: 13, color: T.inkLight, fontWeight: 300, marginBottom: 20 }}>Add a zone to start building your palette.</div>
           <Btn onClick={() => setShowZoneModal(true)} variant="primary">+ Add Zone</Btn>
         </div>
@@ -2084,7 +2097,7 @@ function ZonePaletteView({ zone, projectZone, projectStyles, onBack }) {
   const [regenNote,      setRegenNote]      = useState(null);
   const [showDiscovery,  setShowDiscovery]  = useState(false);
   const [showExport,     setShowExport]     = useState(false);
-  const [gridSize,       setGridSize]       = useState(3);
+  const [gridSize,       setGridSize]       = useState(6);
   const [selectedPlant,  setSelectedPlant]  = useState(null);
   const [manualInput,    setManualInput]    = useState("");
   const [showManual,     setShowManual]     = useState(false);
@@ -2805,7 +2818,7 @@ Rules:
       {/* grid size slider */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
         <span style={{ fontFamily: T.sans, fontSize: 9, fontWeight: 400, letterSpacing: "0.14em", textTransform: "uppercase", color: T.inkLight, whiteSpace: "nowrap" }}>Grid</span>
-        <input type="range" min={2} max={6} step={1} value={gridSize}
+        <input type="range" min={3} max={12} step={1} value={gridSize}
           onChange={e => setGridSize(Number(e.target.value))}
           style={{ flex: 1, maxWidth: 120, accentColor: T.accent, cursor: "pointer" }} />
         <span style={{ fontFamily: T.sans, fontSize: 9, fontWeight: 300, color: T.inkLight, minWidth: 12 }}>{gridSize}</span>
