@@ -607,31 +607,10 @@ async function claudeAPI(prompt, maxTokens = 1200, onDebug = null, label = "call
 }
 
 async function fetchClaudePalette() { return []; }
-) {
-  const excl = excludes.length ? ` Exclude: ${excludes.slice(0, 20).join(", ")}.` : "";
-  const safeCount = Math.min(count, 6); // keep well within 1000 token limit
-  const prompt = `Return a JSON array of exactly ${safeCount} landscape plants for: USDA Zone ${zone}, ${sun}, ${moisture}, ${slope}. Uses: ${use.slice(0,3).join(", ")}. Styles: ${styles.slice(0,3).join(", ")}.${excl} Span all 6 categories (Trees/Shrubs/Grasses/Groundcovers/Ferns/Vines). Native North American preferred.${isDiscovery ? " Include lesser-known species." : ""}
 
-Each object: {"cat":"Trees","common":"name","botanical":"Latin name","size":"H x W","bloom":"Mon-Mon or —","color":"color","favorite":false,"discovery":true}
-
-ONLY the JSON array. No markdown. No explanation.`;
-  const text = await claudeAPI(prompt, 1000, onDebug, "palette");
-  const plants = JSON.parse(text);
-  return plants.map((p, i) => ({ ...p, id: `ai_${Date.now()}_${i}`, favorite: false, discovery: true }));
-}
 
 async function fetchClaudeCategory() { return []; }
-) {
-  const excl = excludes.length ? ` Exclude: ${excludes.slice(0, 15).join(", ")}.` : "";
-  const prompt = `Return a JSON array of exactly 3 ${cat} for: USDA Zone ${zone}, ${sun}, ${moisture}, ${slope}. Uses: ${use.slice(0,3).join(", ")}.${excl}
 
-Each object: {"cat":"${cat}","common":"name","botanical":"Latin name","size":"H x W","bloom":"Mon-Mon or —","color":"color","favorite":false,"discovery":true}
-
-ONLY the JSON array. No markdown. No explanation.`;
-  const text = await claudeAPI(prompt, 1000, onDebug, `cat:${cat}`);
-  const plants = JSON.parse(text);
-  return plants.map((p, i) => ({ ...p, cat, id: `add_${cat}_${Date.now()}_${i}`, favorite: false, discovery: true }));
-}
 
 // ── LOCAL PLANT LOOKUP — primary data source (~220 species) ──────────────────
 const LJLA_FAVORITES = [
