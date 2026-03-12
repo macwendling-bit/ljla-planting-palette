@@ -4,9 +4,6 @@ import React from "react";
 // Module-level image cache — persists across re-renders, one fetch per botanical name
 const IMG_CACHE = {};
 
-// In Railway: set REACT_APP_ANTHROPIC_API_KEY as an environment variable
-const API_KEY = process.env.REACT_APP_ANTHROPIC_API_KEY || "";
-
 // ─────────────────────────────────────────────────────────────────────────────
 // BRAND TOKENS — LeBlanc Jones Landscape Architects
 // Pure white ground · near-black ink · one navy accent · Helvetica Neue thin
@@ -587,19 +584,7 @@ async function claudeAPI(prompt, maxTokens = 1200, onDebug = null, label = "call
   const entry = { label, prompt, ts: new Date().toLocaleTimeString(), status: null, raw: null, extracted: null, error: null };
   const report = (extra = {}) => { if (onDebug) onDebug({ ...entry, ...extra }); };
   try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1000,
-        messages: [{ role: "user", content: prompt }],
-      }),
-    });
+    const res = { ok: false, status: 503, json: async () => ({}) }
     entry.status = res.status;
     if (!res.ok) {
       const errBody = await res.json().catch(() => ({}));
@@ -621,7 +606,8 @@ async function claudeAPI(prompt, maxTokens = 1200, onDebug = null, label = "call
   }
 }
 
-async function fetchClaudePalette({ zone, styles, sun, moisture, use, slope, count, excludes = [], isDiscovery = false, onDebug = null }) {
+async function fetchClaudePalette() { return []; }
+) {
   const excl = excludes.length ? ` Exclude: ${excludes.slice(0, 20).join(", ")}.` : "";
   const safeCount = Math.min(count, 6); // keep well within 1000 token limit
   const prompt = `Return a JSON array of exactly ${safeCount} landscape plants for: USDA Zone ${zone}, ${sun}, ${moisture}, ${slope}. Uses: ${use.slice(0,3).join(", ")}. Styles: ${styles.slice(0,3).join(", ")}.${excl} Span all 6 categories (Trees/Shrubs/Grasses/Groundcovers/Ferns/Vines). Native North American preferred.${isDiscovery ? " Include lesser-known species." : ""}
@@ -634,7 +620,8 @@ ONLY the JSON array. No markdown. No explanation.`;
   return plants.map((p, i) => ({ ...p, id: `ai_${Date.now()}_${i}`, favorite: false, discovery: true }));
 }
 
-async function fetchClaudeCategory({ cat, zone, styles, sun, moisture, use, slope, excludes = [], onDebug = null }) {
+async function fetchClaudeCategory() { return []; }
+) {
   const excl = excludes.length ? ` Exclude: ${excludes.slice(0, 15).join(", ")}.` : "";
   const prompt = `Return a JSON array of exactly 3 ${cat} for: USDA Zone ${zone}, ${sun}, ${moisture}, ${slope}. Uses: ${use.slice(0,3).join(", ")}.${excl}
 
@@ -2349,21 +2336,7 @@ Rules:
 - "cat" must be one of the nine exact values listed.
 - If no plants are identifiable, return { "found": [], "scene": "..." }.`;
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-api-key": API_KEY, "anthropic-version": "2023-06-01" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          messages: [{
-            role: "user",
-            content: [
-              { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
-              { type: "text", text: prompt }
-            ]
-          }]
-        })
-      });
+      const response = { ok: false, status: 503, json: async () => ({}) }
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error?.message || `API error ${response.status}`);
       const raw = data.content.map(b => b.text || "").join("");
@@ -2803,11 +2776,7 @@ Rules:
                 // Minimal ping — simplest possible API call
                 const pingEntry = { label: "ping", prompt: "Reply with the word OK.", ts: new Date().toLocaleTimeString(), status: null, raw: null, extracted: null, error: null };
                 try {
-                  const res = await fetch("https://api.anthropic.com/v1/messages", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", "x-api-key": API_KEY, "anthropic-version": "2023-06-01" },
-                    body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, messages: [{ role: "user", content: "Reply with the word OK." }] }),
-                  });
+                  const res = { ok: false, status: 503, json: async () => ({}) }
                   pingEntry.status = res.status;
                   const data = await res.json();
                   pingEntry.raw = JSON.stringify(data).slice(0, 300);
